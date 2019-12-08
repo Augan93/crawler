@@ -3,7 +3,6 @@ from . import models
 from rest_framework import status
 from rest_framework.response import Response
 from . import serializers
-from django.core.exceptions import FieldError
 
 
 class NewsListView(generics.ListAPIView):
@@ -38,7 +37,7 @@ class NewsListView(generics.ListAPIView):
                 if limit < 0 or offset < 0:
                     return Response(
                         {
-                            'message': 'negative limit or offset is not allowed'
+                            'message': 'negative_limit_or_offset_is_not_allowed'
                         },
                         status=status.HTTP_400_BAD_REQUEST
                     )
@@ -58,7 +57,7 @@ class NewsListView(generics.ListAPIView):
                 if offset < 0:
                     return Response(
                         {
-                            'message': 'negative offset is not allowed'
+                            'message': 'negative_offset_is_not_allowed'
                         },
                         status=status.HTTP_400_BAD_REQUEST
                     )
@@ -78,7 +77,7 @@ class NewsListView(generics.ListAPIView):
                 if limit < 0:
                     return Response(
                         {
-                            'message': 'negative limit is not allowed'
+                            'message': 'negative_limit_is_not_allowed'
                         },
                         status=status.HTTP_400_BAD_REQUEST
                     )
@@ -91,6 +90,8 @@ class NewsListView(generics.ListAPIView):
                 )
 
             queryset = queryset[:limit]
+        else:
+            queryset = queryset[:5]
 
         serializer = self.serializer_class(queryset,
                                            many=True)

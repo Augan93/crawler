@@ -2,11 +2,14 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from .models import News
+import json
 
 
 class CreateBlogTest(APITestCase):
     """Тест Создание поста"""
+
     def setUp(self):
+        self.url = reverse('news:news_list')
         self.data = [
             {
                 'title': 'Test',
@@ -45,41 +48,135 @@ class CreateBlogTest(APITestCase):
         for item in self.data:
             News.objects.create(**item)
 
-    def test_invalid_sort_param(self):
-        url = reverse('news:news_list')
-        print(url)
-        response = self.client.get(url + '?sort={}'.format('4ASDid'))
+    def test_invalid_order_param(self):
+        response = self.client.get(self.url,
+                                   data={'order': 'idad'})
 
         self.assertEqual(response.status_code,
-                         status.HTTP_200_OK)
+                         status.HTTP_400_BAD_REQUEST)
 
+    def test_asc_order_by_id(self):
+        """Тест сортировки по возрастанию id"""
+        response = self.client.get(self.url,
+                                   data={'order': 'id'})
+        news = json.loads(response.content)
+        sorted_news = sorted(news,
+                             key=lambda item: item['id'])
+        self.assertEqual(news,
+                         sorted_news)
 
-    # def test_create_blog_by_common_user(self):
-    #     """Создание поста как обычный пользователь (НЕ БЛОГ-АДМИН)"""
-    #     self.superuser = User.objects.create_superuser(
-    #         username='test@mail.ru',
-    #         email='test@mail.ru',
-    #         password='123'
-    #     )
-    #     self.profile = Profile.objects.create(
-    #         user=self.superuser,
-    #         middle_name='middleName',
-    #         first_name='firstName',
-    #         last_name='lastName',
-    #         phone='phone',
-    #         self_registration=True,
-    #         confirm_id=str(uuid4()),
-    #         uid1c=str(uuid4()),
-    #         connect_token=str(uuid4()),
-    #         blog_admin=False,
-    #     )
-    #     self.client.login(username='test@mail.ru',
-    #                       password='123')
-    #
-    #     url = reverse('blog:post-create')
-    #     response = self.client.post(url,
-    #                                 self.data,
-    #                                 format='json')
-    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-    #
-    #
+    def test_desc_order_by_id(self):
+        """Тест сортировки по убыванию id"""
+        response = self.client.get(self.url,
+                                   data={'order': '-id'})
+        news = json.loads(response.content)
+        sorted_news = sorted(news,
+                             key=lambda item: item['id'],
+                             reverse=True)
+
+        self.assertEqual(news,
+                         sorted_news)
+
+    def test_order_offset_limit_by_id(self):
+        """Тест сортировки по возрастанию id, offset=2, limit=4"""
+        response = self.client.get(self.url,
+                                   data={
+                                       'order': 'id',
+                                       'offset': '2',
+                                       'limit': '4'})
+        news = json.loads(response.content)
+        sorted_news = sorted(news,
+                             key=lambda item: item['id'])
+        print(news)
+        print(sorted_news)
+
+        self.assertEqual(news,
+                         sorted_news)
+        self.assertEqual(len(news),
+                         4)
+
+    def test_news_count(self):
+        """Тест количество возвращаемых постов (по умполчанию - 5)"""
+        response = self.client.get(self.url,
+                                   data={'order': 'id'})
+
+        news = json.loads(response.content)
+
+        self.assertEqual(len(news),
+                         5)
+
+    def test_news_limit(self):
+        """Тест limit постов"""
+        response = self.client.get(self.url,
+                                   data={'limit': '3'})
+
+        news = json.loads(response.content)
+
+        self.assertEqual(len(news),
+                         3)
+
+    def test_negative_limit(self):
+        """Тест, минусовой параметр limit"""
+        response = self.client.get(self.url,
+                                   data={'limit': '-3'})
+        message = json.loads(response.content)
+
+        self.assertEqual(response.status_code,
+                         status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(message['message'], "negative_limit_is_not_allowed")
+
+    def test_negative_offset(self):
+        """Тест, минусовой параметр offset"""
+        response = self.client.get(self.url,
+                                   data={'offset': '-3'})
+        message = json.loads(response.content)
+
+        self.assertEqual(response.status_code,
+                         status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(message['message'], "negative_offset_is_not_allowed")
+
+    def test_negative_limit_or_offset(self):
+        """Тест, минусовой параметр offset и limit"""
+        response = self.client.get(self.url,
+                                   data={
+                                       'offset': '-3',
+                                       'limit': '-3',
+                                   })
+        message = json.loads(response.content)
+
+        self.assertEqual(response.status_code,
+                         status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(message['message'], "negative_limit_or_offset_is_not_allowed")
+
+    def test_non_numeric_limit(self):
+        """Тест не числовой параметр limit"""
+        response = self.client.get(self.url,
+                                   data={'limit': 'adad'})
+        message = json.loads(response.content)
+
+        self.assertEqual(response.status_code,
+                         status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(message['message'], "invalid_param")
+
+    def test_non_numeric_offset(self):
+        """Тест не числовой параметр offset"""
+        response = self.client.get(self.url,
+                                   data={'offset': 'adad'})
+        message = json.loads(response.content)
+
+        self.assertEqual(response.status_code,
+                         status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(message['message'], "invalid_param")
+
+    def test_non_numeric_limit_or_offset(self):
+        """Тест не числовой параметр offset и limit"""
+        response = self.client.get(self.url,
+                                   data={
+                                       'offset': 'adad',
+                                       'limit': '3asd',
+                                   })
+        message = json.loads(response.content)
+
+        self.assertEqual(response.status_code,
+                         status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(message['message'], "invalid_param")
