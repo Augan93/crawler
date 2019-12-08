@@ -16,26 +16,31 @@ def scrape():
     except:
         return
 
-    page = resp.content
+    if resp.status_code == 200:
+        page = resp.content
 
-    soup = BeautifulSoup(page,
-                         features='lxml')
+        soup = BeautifulSoup(page,
+                             features='lxml')
 
-    elems = soup.find_all('tr', attrs={'class': 'athing'})
+        elems = soup.find_all('tr', attrs={'class': 'athing'})
 
-    for i, el in enumerate(elems):
-        a = el.find('a', attrs={'class': 'storylink'})
-        url = a['href']
-        title = a.text
-        News.objects.create(
-            title=title,
-            url=url,
-        )
-        print(i, a)
-        # time.sleep(1)
+        for i, el in enumerate(elems):
+            a = el.find('a', attrs={'class': 'storylink'})
+            url = a['href']
+            title = a.text
+
+            try:
+                News.objects.get(url=url)
+            except News.DoesNotExist:
+                News.objects.create(
+                    title=title,
+                    url=url,
+                )
+
+            print(i, a)
 
 
 @app.task
-def hello():
+def get_news():
     scrape()
     print("Hello there!")

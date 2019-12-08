@@ -83,7 +83,7 @@ DATABASES = {
         'NAME': 'crawler',
         'USER': 'postgres',
         'PASSWORD': '1',
-        'HOST': 'database',  # database # <-- IMPORTANT: same name as docker-compose service!
+        'HOST': 'localhost',  # database # <-- IMPORTANT: same name as docker-compose service!
         'PORT': '5432',
     }
 }
@@ -150,7 +150,7 @@ REST_FRAMEWORK = {
         'rest_framework.parsers.JSONParser',
         'rest_framework.parsers.FormParser',
         'rest_framework.parsers.MultiPartParser',
-        # 'rest_framework.parsers.FileUploadParser',
+        'rest_framework.parsers.FileUploadParser',
     ),
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema'
 }
@@ -163,6 +163,7 @@ BROKER_URL = 'redis://' + REDIS_HOST + ':' + REDIS_PORT + '/0'
 BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
 CELERY_RESULT_BACKEND = 'redis://' + REDIS_HOST + ':' + REDIS_PORT + '/0'
 # CELERY_RESULT_BACKEND = 'django-db'
+
 
 # CELERY_BEAT_SCHEDULE = {
 #     'task-number-one': {

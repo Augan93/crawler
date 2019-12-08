@@ -22,10 +22,9 @@ app.autodiscover_tasks()
 
 
 app.conf.beat_schedule = {
-    'add-every-30-seconds': {
-        'task': 'news.tasks.hello',
-        'schedule': 5,  # execute every 30 second
-        # 'args': (16, 16)
+    'get-news-every-30-minutes': {
+        'task': 'news.tasks.get_news',
+        'schedule': 5,  # execute every 1800 second
     },
 }
 app.conf.timezone = 'UTC'

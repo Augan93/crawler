@@ -11,11 +11,6 @@ services:
     networks:
       - nginx_network
       - database_network
-#    command: bash -c "
-#               cd crawler
-#               && python manage.py migrate"
-#    links:
-#      - redis
     depends_on:
       - database
       - redis
@@ -28,7 +23,7 @@ services:
       - ./config/nginx/conf.d:/etc/nginx/conf.d
       - static_volume:/opt/services/djangoapp/static  # <-- bind the static volume
       - media_volume:/opt/services/djangoapp/media  # <-- bind the media volume
-    depends_on: # <-- wait for djangoapp to be "ready" before starting this service
+    depends_on:
       - djangoapp
     networks:
       - nginx_network
@@ -59,8 +54,6 @@ services:
     networks:
       - database_network
       - redis_network
-#    links:
-#      - redis
     depends_on:
     - database
     - redis
@@ -72,8 +65,6 @@ services:
                && celery -A crawler beat -l info"
     volumes:
     - .:/opt/services/djangoapp/src
-#    links:
-#      - redis
     networks:
       - redis_network
     depends_on:
