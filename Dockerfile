@@ -16,5 +16,11 @@ COPY . /opt/services/djangoapp/src
 # expose the port 8000
 EXPOSE 8000
 
+RUN adduser --disabled-password --gecos '' myuser
+
 # define the default command to run when starting the container
 CMD ["gunicorn", "--chdir", "crawler", "--bind", ":8000", "crawler.wsgi:application"]
+
+#CMD ["--chdir", "crawler", "python", "manage.py", "collectstatic", "--no-input", "python", "manage.py", "migrate", "gunicorn", "--bind", ":8000", "crawler.wsgi:application"]
+
+#CMD python manage.py collectstatic --no-input;python manage.py migrate; --chdir crawler; gunicorn crawler.wsgi -b 0.0.0.0:8000

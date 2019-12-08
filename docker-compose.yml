@@ -10,9 +10,15 @@ services:
       - media_volume:/opt/services/djangoapp/media  # <-- bind the media volume
     networks:
       - nginx_network
-      - database1_network
+      - database_network
+#    command: bash -c "
+#               cd crawler
+#               && python manage.py migrate"
+#    links:
+#      - redis
     depends_on:
-      - database1
+      - database
+      - redis
 
   nginx:
     image: nginx:1.13
@@ -27,22 +33,65 @@ services:
     networks:
       - nginx_network
 
-  database1:
+  database:
     image: postgres:10
     env_file:
       - config/db/database1_env
     networks:
-      - database1_network
+      - database_network
     volumes:
-      - database1_volume:/var/lib/postgresql/data
+      - database_volume:/var/lib/postgresql/data
+
+  redis:
+    image: "redis:alpine"
+    networks:
+      - redis_network
+    volumes:
+    - 'redis_volume:/data'
+
+  celery:
+    build: .
+    command: bash -c "
+               cd crawler
+               && celery -A crawler worker -l info"
+    volumes:
+    - .:/opt/services/djangoapp/src
+    networks:
+      - database_network
+      - redis_network
+#    links:
+#      - redis
+    depends_on:
+    - database
+    - redis
+
+  celery-beat:
+    build: .
+    command: bash -c "
+               cd crawler
+               && celery -A crawler beat -l info"
+    volumes:
+    - .:/opt/services/djangoapp/src
+#    links:
+#      - redis
+    networks:
+      - redis_network
+    depends_on:
+    - database
+    - redis
+
 
 networks:
   nginx_network:
     driver: bridge
-  database1_network:
+  database_network:
+    driver: bridge
+  redis_network:
     driver: bridge
 
+
 volumes:
-  database1_volume:
+  database_volume:
   static_volume:  # <-- declare the static volume
   media_volume:  # <-- declare the media volume
+  redis_volume:
