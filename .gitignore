@@ -2,3 +2,4 @@ venv/*
 .idea/*
 celery/*
 celerybeat-schedule
+celerybeat.pid

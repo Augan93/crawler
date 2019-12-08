@@ -26,9 +26,7 @@ def scrape():
             url = a['href']
             title = a.text
 
-            try:
-                News.objects.get(url=url)
-            except News.DoesNotExist:
+            if not News.objects.filter(url=url).exists():
                 News.objects.create(
                     title=title,
                     url=url,

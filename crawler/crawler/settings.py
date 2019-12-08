@@ -83,7 +83,7 @@ DATABASES = {
         'NAME': 'crawler',
         'USER': 'postgres',
         'PASSWORD': '1',
-        'HOST': 'localhost',  # database # <-- IMPORTANT: same name as docker-compose service!
+        'HOST': 'database',  # database # <-- IMPORTANT: same name as docker-compose service!
         'PORT': '5432',
     }
 }
@@ -157,18 +157,12 @@ REST_FRAMEWORK = {
 
 
 # REDIS related settings
-REDIS_HOST = 'redis'  # for Docker   # '127.0.0.1'
+REDIS_HOST = 'redis'  # for Docker
 REDIS_PORT = '6379'
 BROKER_URL = 'redis://' + REDIS_HOST + ':' + REDIS_PORT + '/0'
 BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
 CELERY_RESULT_BACKEND = 'redis://' + REDIS_HOST + ':' + REDIS_PORT + '/0'
-# CELERY_RESULT_BACKEND = 'django-db'
 
 
-# CELERY_BEAT_SCHEDULE = {
-#     'task-number-one': {
-#         'task': 'news.tasks.hello',
-#         'schedule': crontab(minute=1),
-#         # 'args': (*args)
-#     },
-# }
+
+
