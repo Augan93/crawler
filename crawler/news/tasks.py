@@ -1,11 +1,8 @@
 from crawler.celery import app
-# from crawler.crawler.news.utils import scrape
-
 from bs4 import BeautifulSoup
 import requests
 from .models import News
 
-# from crawler.crawler.settings import site_url
 
 site_url = 'https://news.ycombinator.com/'
 
