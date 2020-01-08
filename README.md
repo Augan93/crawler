@@ -1,6 +1,6 @@
 "# crawler" 
-
-Краулер запускается периодически каждые 30 минут
+Web Scraper Hacker News
+Web scraper launches every 30 min.
 
 **Инструкция по запуске:**
 
