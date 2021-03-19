@@ -6,7 +6,7 @@ lxml==4.4.0
 requests==2.22.0
 beautifulsoup4==4.8.0
 django-cron==0.5.1
-djangorestframework==3.10.2
+djangorestframework==3.11.2
 psycopg2-binary
 gunicorn
 celery
